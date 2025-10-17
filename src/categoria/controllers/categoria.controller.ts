@@ -29,7 +29,7 @@ export class CategoriaController {
     return this.categoriaService.findAllByIcone(icone);
   }
 
-  @Post()
+  @Post('/cadastrar')
   @HttpCode(HttpStatus.CREATED)
   create(@Body() Categoria: Categoria): Promise<Categoria> {
     return this.categoriaService.create(Categoria);

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../../auth/guard/jwt-auth.guard";
 import { Usuario } from "../entities/usuario.entity";
@@ -16,11 +16,11 @@ export class UsuarioController {
     findAll(): Promise<Usuario[]> {
         return this.usuarioService.findAll();
     }
-    
+
     @UseGuards(JwtAuthGuard)
     @Get('/:id')
     @HttpCode(HttpStatus.OK)
-    findById(@Param('id', ParseIntPipe) id: number): Promise<Usuario>{
+    findById(@Param('id', ParseIntPipe) id: number): Promise<Usuario> {
         return this.usuarioService.findById(id)
     }
 
@@ -30,11 +30,18 @@ export class UsuarioController {
         return await this.usuarioService.create(usuario);
     }
 
+
     @UseGuards(JwtAuthGuard)
     @Put('/atualizar')
     @HttpCode(HttpStatus.OK)
     async update(@Body() usuario: Usuario): Promise<Usuario> {
         return this.usuarioService.update(usuario);
+    }
+    @UseGuards(JwtAuthGuard)
+    @Delete('/:id')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async delete(@Param('id', ParseIntPipe) id: number) {
+        return this.usuarioService.delete(id);
     }
 
 }

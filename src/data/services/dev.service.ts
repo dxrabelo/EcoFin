@@ -16,7 +16,7 @@ export class DevService implements TypeOrmOptionsFactory {
       password: '3112',
       database: 'db_EcoFin',
       entities: [Transacao, Categoria, Usuario],
-      synchronize: true,
+      synchronize: false,
     };
   }
 }

@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { Usuario } from '../entities/usuario.entity';
 import { Bcrypt } from '../../auth/bcrypt/bcrypt';
 
@@ -12,10 +12,10 @@ export class UsuarioService {
     private bcrypt: Bcrypt,
   ) {}
 
-  async findByUsuario(usuario: string): Promise<Usuario | null> {
+  async findByEmail(email: string): Promise<Usuario | null> {
     return await this.usuarioRepository.findOne({
       where: {
-        email: usuario,
+        email,
       },
     });
   }
@@ -38,7 +38,7 @@ export class UsuarioService {
   }
 
   async create(usuario: Usuario): Promise<Usuario> {
-    const buscaUsuario = await this.findByUsuario(usuario.email);
+    const buscaUsuario = await this.findByEmail(usuario.email);
 
     if (buscaUsuario)
       throw new HttpException('O Usuario já existe!', HttpStatus.BAD_REQUEST);
@@ -50,7 +50,7 @@ export class UsuarioService {
   async update(usuario: Usuario): Promise<Usuario> {
     await this.findById(usuario.id);
 
-    const buscaUsuario = await this.findByUsuario(usuario.email);
+    const buscaUsuario = await this.findByEmail(usuario.email);
 
     if (buscaUsuario && buscaUsuario.id !== usuario.id)
       throw new HttpException(
@@ -61,4 +61,14 @@ export class UsuarioService {
     usuario.senha = await this.bcrypt.criptografarSenha(usuario.senha);
     return await this.usuarioRepository.save(usuario);
   }
+
+   async delete(id: number): Promise<DeleteResult> {
+    const usuario = await this.findById(id);
+
+    if (!usuario)
+      throw new HttpException('Usuário não encontrado!', HttpStatus.NOT_FOUND);
+
+    return await this.usuarioRepository.delete(id);
+  }
+
 }

@@ -1,7 +1,7 @@
 import { JwtService } from '@nestjs/jwt';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Bcrypt } from '../bcrypt/bcrypt';
-import { EmailLogin} from '../entities/emaillogin.entity';
+import { EmailLogin } from '../entities/emaillogin.entity';
 import { UsuarioService } from '../../usuario/service/usuario.service';
 
 @Injectable()
@@ -10,42 +10,43 @@ export class AuthService {
     private usuarioService: UsuarioService,
     private jwtService: JwtService,
     private bcrypt: Bcrypt,
-  ) { }
+  ) {}
 
-  async validateUser(username: string, password: string): Promise<any> {
-    const buscaUsuario = await this.usuarioService.findByUsuario(username);
+  // Verifica se o usuário existe e se a senha está correta
+  async validateUser(email: string, senha: string): Promise<any> {
+    const buscaUsuario = await this.usuarioService.findByEmail(email);
 
-    if (!buscaUsuario)
+    if (!buscaUsuario) {
       throw new HttpException('Usuário não encontrado!', HttpStatus.NOT_FOUND);
+    }
 
-    const matchPassword = await this.bcrypt.compararSenhas(
-      password,
+    const senhaCorreta = await this.bcrypt.compararSenhas(
+      senha,
       buscaUsuario.senha,
     );
 
-    if (buscaUsuario && matchPassword) {
-      const { senha, ...resposta } = buscaUsuario;
-      return resposta;
+    if (buscaUsuario && senhaCorreta) {
+      const { senha, ...resultado } = buscaUsuario;
+      return resultado;
     }
 
     return null;
   }
 
+  // Gera o token JWT se o usuário for válido
   async login(emailLogin: EmailLogin) {
-    const payload = { sub: emailLogin.email };
+    const buscaUsuario = await this.usuarioService.findByEmail(emailLogin.email);
 
-    const buscaUsuario = await this.usuarioService.findByUsuario(
-      emailLogin.email,
-    );
-
-    if (!buscaUsuario)
+    if (!buscaUsuario) {
       throw new HttpException('Usuário não encontrado!', HttpStatus.NOT_FOUND);
+    }
+
+    const payload = { sub: buscaUsuario.id, email: buscaUsuario.email };
 
     return {
       id: buscaUsuario.id,
       nome: buscaUsuario.nome,
-      email: emailLogin.email,
-      senha: '',
+      email: buscaUsuario.email,
       token: `Bearer ${this.jwtService.sign(payload)}`,
     };
   }
