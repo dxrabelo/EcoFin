@@ -13,7 +13,7 @@ export class DevService implements TypeOrmOptionsFactory {
       host: 'localhost',
       port: 3306,
       username: 'root',
-      password: '3112',
+      password: 'root',
       database: 'db_EcoFin',
       entities: [Transacao, Categoria, Usuario],
       synchronize: false,
